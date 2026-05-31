@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     },
     avatar:{
         type:String,// using cloudinary
-        required:false
+        required:true
     },
     coverImage:{
         type:String,// using cloudinary
@@ -43,7 +43,7 @@ const userSchema = new mongoose.Schema({
     watchHistory:[
         {
             type:mongoose.Schema.Types.ObjectId,
-            ref:'Videa'
+            ref:'Video'
         }
     ]
 }, { timestamps: true });
