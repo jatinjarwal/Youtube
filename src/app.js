@@ -1,0 +1,16 @@
+import express from 'express';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
+
+const app=express();
+app.use(express.json({limit:'12kb'}));
+app.use(cors({
+    origin:CORS_ORIGIN,
+    credentials:true
+}));
+
+app.use(cookieParser());
+app.use(express.static('public'));
+app.use(express.urlencoded({limit:'12kb', extended:true}));
+
+export {app};
