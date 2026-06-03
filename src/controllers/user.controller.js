@@ -60,9 +60,9 @@ if(!avatarLocalPath){
         throw new ApiError(500, "Failed to register user");
     }
 
-    
+
    return res.status(201).json(
-        new ApiResponse(201, "User registered successfully", userCreated)
+        new ApiResponse(201, userCreated, "User registered successfully")
     );
 });
 
