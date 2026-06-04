@@ -1,14 +1,16 @@
 import asynchandler from "../utils/asynchandler.js";
-import { ApiError } from "../utils/apiError.js";
-import { ApiResponse } from "../utils/apiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 
 const generateAccessRefreshTokens = async (userId) => {
     try {           
-
+    
     const user= await User.findById(userId);
+   
     const accessToken = user.generateAccessToken();
     const refreshToken = user.generateRefreshToken();
     user.refreshToken = refreshToken;
@@ -16,8 +18,9 @@ const generateAccessRefreshTokens = async (userId) => {
     return { accessToken, refreshToken };
 }
 catch (error) {
-    console.error("Error generating tokens:", error);
-    throw new ApiError(500, "Failed to generate tokens");
+   console.error("Error generating tokens:", error);
+   throw new ApiError(500, "Failed to generate tokens");
+    
 } 
  }
 
@@ -138,4 +141,32 @@ const logoutUser = asynchandler(async (req, res) => {
 
  });
 
-export { registerUser, loginUser,logoutUser };
+ const refreshAccessToken = asynchandler(async (req, res) => {
+    const incomingRefreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+    if (!incomingRefreshToken) {
+        throw new ApiError(400, "Refresh token is required");
+    }
+   try {
+     const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET);
+     const user=await User.findById(decodedToken._id);
+     if (!user || user.refreshToken !== incomingRefreshToken) {
+         throw new ApiError(401, "Invalid refresh token");
+     }
+     const { accessToken, refreshToken } = await generateAccessRefreshTokens(user._id);
+     const options = {
+         httpOnly: true,
+         secure: true
+     };
+     return res.status(200)
+         .cookie("refreshToken", refreshToken, options)
+         .cookie("accessToken", accessToken, options)
+         .json(new ApiResponse(200, { accessToken, refreshToken }, "Access token refreshed successfully"));  
+ 
+ 
+   } catch (error) {
+    throw new ApiError(401, error?.message||"Invalid refresh token");
+   }
+});
+
+ 
+export { registerUser, loginUser,logoutUser, refreshAccessToken };

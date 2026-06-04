@@ -10,7 +10,7 @@ const PORT=process.env.PORT || 3000;
     });
 }   )
 .catch((err) => {
-    console.error('Error connecting to database:', err);
+    console.log('Error connecting to database:', err);
     process.exit(1);
 }); 
 

@@ -7,7 +7,7 @@ const connectDb=async()=>{
         console.log(`Connected to database ${connectionInstance.connection.name} successfully`);
     
     
-        console.log('Error connecting to database',error);
+        
         
     
 }
