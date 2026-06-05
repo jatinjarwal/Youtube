@@ -28,8 +28,16 @@ const userSchema = new mongoose.Schema({
         type:String,// using cloudinary
         required:true
     },
+    avatarPublicId:{
+        type:String,
+        required:true
+    },
     coverImage:{
         type:String,// using cloudinary
+        required:false
+    },
+    coverImagePublicId:{
+        type:String,
         required:false
     },
     password:{
