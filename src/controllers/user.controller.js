@@ -5,6 +5,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { deleteFromCloudinary } from "../utils/deleteUploads.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 
 
@@ -244,7 +245,7 @@ const updateUserAvatar= asynchandler(async (req,res)=>{
 
 
   
-     try {
+    try {
         await deleteFromCloudinary(publicId);
     } catch (error) {
         console.log("error while deleting from cloudinary",error)
@@ -349,6 +350,50 @@ const getUserChannelProfile = asynchandler(async (req,res)=>{
 
 })
 
+const getWatchHistory= asynchandler(async(req,res)=>{
+    const user=  await User.aggregate([
+
+        {
+            $match:{
+                _id:new mongoose.Types.ObjectId(req.user._id)
+            }
+
+
+        },
+        {
+            $lookup:{
+                from: "videos",
+                localField:"watchHistory",
+                foreignField:"_id",
+                as: "watchHistory",
+                    pipeline:[
+                        {
+                            $lookup:{
+                                from:"users",
+                                localField:"owner",
+                                foreignField:"_id",
+                                as:"owner",
+                                pipeline:[
+                                    {
+                                        $addFields:{
+                                            owner:{
+                                                $first:"$owner"
+                                            }
+                                        }
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+            }
+        }
+    ])
+    return res.status(200)
+    .json(new ApiResponse(200,user[0].watchHistory,"watchHistory fetched successfully") )
+
+    
+})
+
 
 export {
     registerUser,
@@ -360,5 +405,6 @@ export {
     updateUserDetails,
     updateUserAvatar,
     updateUserCoverImage,
-    getUserChannelProfile
+    getUserChannelProfile,
+    getWatchHistory
 };
