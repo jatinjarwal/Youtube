@@ -245,11 +245,9 @@ const updateUserAvatar= asynchandler(async (req,res)=>{
 
 
   
-    try {
+    
         await deleteFromCloudinary(publicId);
-    } catch (error) {
-        console.log("error while deleting from cloudinary",error)
-    }
+   
 
 
    
@@ -283,6 +281,7 @@ const updateUserCoverImage= asynchandler(async (req,res)=>{
 
 const getUserChannelProfile = asynchandler(async (req,res)=>{
     const {username}= req.params;
+    const _id=new mongoose.Types.ObjectId(req.user._id);
     if(!username){
         throw new ApiError(400 , "no channel found");
     }
@@ -319,7 +318,7 @@ const getUserChannelProfile = asynchandler(async (req,res)=>{
             },
             isSubscribed:{
                 $cond:{
-                    if:{$in:[req.user?._id,"$subscribers.subscriber"]},
+                    if:{$in:[_id,"$subscribers.subscriber"]},
                     then:true,
                     else:false
                 }
@@ -373,16 +372,27 @@ const getWatchHistory= asynchandler(async(req,res)=>{
                                 localField:"owner",
                                 foreignField:"_id",
                                 as:"owner",
-                                pipeline:[
-                                    {
-                                        $addFields:{
-                                            owner:{
-                                                $first:"$owner"
-                                            }
+                                         pipeline:[
+                                      {
+                                        $project:{
+                                            username:1,
+                                            fullName:1,
+                                            avatar:1
                                         }
                                     }
                                 ]
+                               
                             }
+                        },
+                        {
+                                            
+                    $addFields:{
+                            owner:{
+                            $first:"$owner"
+                             }
+                     }
+                                    
+                                
                         }
                     ]
             }

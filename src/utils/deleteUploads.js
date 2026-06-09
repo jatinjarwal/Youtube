@@ -8,11 +8,16 @@ cloudinary.config({
 
 const deleteFromCloudinary = async (publicId) => {
   
-    if (!publicId) {
-      throw new ApiError(400, "Public ID is required");
-    }
-    const result = await cloudinary.uploader.destroy(publicId);
-    return result;
-  
+   try {
+     if (!publicId) {
+       throw new ApiError(400, "Public ID is required");
+     }
+     const result = await cloudinary.uploader.destroy(publicId);
+     return result;
+   
+   } catch (error) {
+      console.log("deletion failed",error);
+      return null
+   }
 };
 export { deleteFromCloudinary };
