@@ -1,12 +1,12 @@
-import aysnchandelr from "../utils/asynchandler"
-import {Like} from "../models/like.model"
-import{Video} from "../models/video.model"
-import{Comment} from "../models/comment.model"
-import{Tweet} from "../models/tweet.model"
-import {ApiError} from "../utils/ApiError"
-import {ApiResponse} from "../utils/ApiResponse"
+import aysnchandler from "../utils/asynchandler.js"
+import {Like} from "../models/like.model.js"
+import{Video} from "../models/video.model.js"
+import{Comment} from "../models/comment.model.js"
+import{Tweet} from "../models/tweet.model.js"
+import {ApiError} from "../utils/ApiError.js"
+import {ApiResponse} from "../utils/ApiResponse.js"
 import mongoose from "mongoose"
-import asyncHandler from "../utils/asynchandler"
+import asyncHandler from "../utils/asynchandler.js"
 
 
 

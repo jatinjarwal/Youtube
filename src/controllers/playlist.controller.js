@@ -1,8 +1,8 @@
-import asynchandler from "../utils/asynchandler"
+import asynchandler from "../utils/asynchandler.js"
 import mongoose ,{isValidObjectId}from "mongoose"
-import {Playlist} from "../models/playlist.model"
-import {ApiError} from "../utils/ApiError"
-import {ApiResponse} from "../utils/ApiResponse"
+import {Playlist} from "../models/playlist.model.js"
+import {ApiError} from "../utils/ApiError.js"
+import {ApiResponse} from "../utils/ApiResponse.js"
 
 
 

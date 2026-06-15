@@ -1,7 +1,7 @@
-import {Comment} from "../models/comment.model"
-import { asyncHandler } from "../utils/asynchandler";
-import { ApiResponse } from "../utils/ApiResponse";
-import { ApiError } from "../utils/ApiError";
+import {Comment} from "../models/comment.model.js"
+import  asyncHandler  from "../utils/asynchandler.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { ApiError } from "../utils/ApiError.js";
 import mongoose from "mongoose"
 
 
@@ -66,8 +66,8 @@ const addComment= asyncHandler(async(req,res)=>{
     const {video_id }= req.params
     const comment = await Comment.create({
         content:content,
-        video=video_id,
-        owner=owner
+        video:video_id,
+        owner:owner
     })
      if(!comment?.trim()){
     throw new ApiError(500,"error while adding comment")

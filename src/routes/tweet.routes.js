@@ -3,12 +3,12 @@ import { createTweet,
         updateTweet,
         deleteTweet
         
- } from "../controllers/tweet.controller";
+ } from "../controllers/tweet.controller.js";
 
  import {Router} from "express"
  const router=Router()
 
- import { verifyJWT } from "../middlewares/auth.middleware";
+ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
  router.route('/').post(verifyJWT,createTweet).get(verifyJWT,getUserTweets)
 
