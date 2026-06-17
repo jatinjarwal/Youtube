@@ -1,10 +1,10 @@
-import asynchandler from "../utils/asynchandler"
-import {Video} from "../models/video.model"
-import {ApiError} from "../utils/ApiError"
-import {ApiResponse} from "..//utils/ApiResponse"
+import asynchandler from "../utils/asynchandler.js"
+import {Video} from "../models/video.model.js"
+import {ApiError} from "../utils/ApiError.js"
+import {ApiResponse} from "..//utils/ApiResponse.js"
 import mongoose from "mongoose"
 import { isValidObjectId } from "mongoose"
-import { uploadOnCloudinary } from "../utils/cloudinary"
+import { uploadOnCloudinary } from "../utils/cloudinary.js"
 
 
 

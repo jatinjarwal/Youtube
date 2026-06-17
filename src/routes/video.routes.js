@@ -25,6 +25,8 @@ import { getVideos,
  .delete(deleteVideo)
 
  router.route('/t/:video_id').patch(togglePublishStatus)
+
+ export default router
  
  
 
