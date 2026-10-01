@@ -5,6 +5,10 @@ import {ApiResponse} from "..//utils/ApiResponse.js"
 import mongoose from "mongoose"
 import { isValidObjectId } from "mongoose"
 import { uploadOnCloudinary } from "../utils/cloudinary.js"
+import { Comment } from "../models/comment.model.js" 
+import { Like } from "../models/like.model.js" 
+import { Playlist } from "../models/playlist.model.js" 
+
 
 
 
@@ -58,13 +62,21 @@ const publishVideo= asynchandler(async(req,res)=>{
     if(!videoLocalPath|| !thumbnailLocalPath){
         throw new ApiError(400,"video and thumbnail are required")
     }
-    const videoFile=await uploadOnCloudinary(videoLocalPath)
-    if(!videoFile){
-        throw new ApiError(500,"video not uploaded on cloudinary")
-    }
-    const thumbnail=await uploadOnCloudinary(thumbnailLocalPath)
-     if(!thumbnail){
-        throw new ApiError(500,"thumbnail not uploaded on cloudinary")
+   const [videoFile, thumbnail] = await Promise.all([
+        uploadOnCloudinary(videoLocalPath),
+        uploadOnCloudinary(thumbnailLocalPath)
+    ]);
+    if(!videoFile || !thumbnail){
+    if(videoFile){
+        await deleteFromCloudinary(videoFile.public_id, "video");
+        
+     }
+   
+     if(thumbnail){
+        await deleteFromCloudinary(thumbnail.public_id, "image");
+        
+     }
+     throw new ApiError(500, "Failed to upload all media assets. Please try again.");
     }
     const video= await Video.create({
         videoFile:videoFile.secure_url,
@@ -134,24 +146,59 @@ const updateVideo = asynchandler(async(req,res)=>{
 
 })
 
-const deleteVideo= asynchandler(async(req,res)=>{
-    const {video_id}=req.params
-    const user_id=req.user._id
-    if(!isValidObjectId(video_id)){
-        throw new ApiError(400,"invalid videoId")
-    }
-    const video=await Video.findById(video_id)
-    if(!video){
-        throw new ApiError(404,"video not found")
-    }
-    if(!video.owner.equals(user_id)){
-        throw new ApiError(403,"unauthorized access")
-    }
-    await video.deleteOne()
+const deleteVideo = asynchandler(async(req, res) => {
+    const {video_id} = req.params;
+    const user_id = req.user._id;
 
-    return res.status(200)
-    .json(new ApiResponse(200,{},"video deleted successfully"))
-})
+    if(!isValidObjectId(video_id)){
+        throw new ApiError(400, "invalid videoId");    
+    }
+
+    const video = await Video.findById(video_id); 
+    if(!video){ 
+        throw new ApiError(404, "video not found"); 
+    }
+
+    if(!video.owner.equals(user_id)){ 
+        throw new ApiError(403, "unauthorized access"); 
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    try {
+      
+        await Video.findByIdAndDelete(video_id, { session });
+        await Comment.deleteMany({ video: video_id }, { session });
+        await Like.deleteMany({ video: video_id }, { session });
+
+        await Playlist.updateMany(
+            { videos: video_id },
+            { $pull: { videos: video_id } },
+            { session }
+        );
+
+        //Cloudinary
+        const videoPublicId = video.videoFile.split('/').pop().split('.')[0];
+        const thumbnailPublicId = video.thumbnail.split('/').pop().split('.')[0];
+    
+        await Promise.all([
+            deleteFromCloudinary(videoPublicId, "video"), 
+            deleteFromCloudinary(thumbnailPublicId, "image") 
+        ]);
+  
+        await session.commitTransaction();
+        return res.status(200).json( 
+            new ApiResponse(200, {}, "Video and associated data deleted successfully") 
+        );
+
+    } catch (error) {
+        await session.abortTransaction();
+        throw new ApiError(500, error?.message || "Failed to delete video and associated data");
+    } finally {
+        session.endSession();
+    }
+});
 
 const togglePublishStatus=asynchandler(async(req,res)=>{
     const {video_id}=req.params

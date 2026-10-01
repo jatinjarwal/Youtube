@@ -32,4 +32,7 @@ app.use('/api/v1/videos',videoRoutes)
 app.use('/api/v1/subscriptions',subscriptionRoutes)
 app.use('/api/v1/dashboard',dashboardRoutes)
 app.use('/api/v1/health',healthRoutes)
+
+import { errorHandler } from './middlewares/error.middleware.js';
+app.use(errorHandler)
 export {app};
