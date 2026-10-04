@@ -8,6 +8,8 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js"
 import { Comment } from "../models/comment.model.js" 
 import { Like } from "../models/like.model.js" 
 import { Playlist } from "../models/playlist.model.js" 
+import { VideoQueue } from "../queues/video.queue.js"
+import fs from "fs"
 
 
 
@@ -53,6 +55,7 @@ const getVideos= asynchandler(async(req,res)=>{
 
 const publishVideo= asynchandler(async(req,res)=>{
     const {title,description} =req.body
+    const user_id=req.user._id
     if(!title?.trim()){
         throw new ApiError(400,"title is required")
     }
@@ -60,41 +63,21 @@ const publishVideo= asynchandler(async(req,res)=>{
     
     const thumbnailLocalPath=req.files?.thumbnail?.[0]?.path
     if(!videoLocalPath|| !thumbnailLocalPath){
+        if (videoLocalPath) fs.unlinkSync(videoLocalPath);
+        if (thumbnailLocalPath) fs.unlinkSync(thumbnailLocalPath);
         throw new ApiError(400,"video and thumbnail are required")
     }
-   const [videoFile, thumbnail] = await Promise.all([
-        uploadOnCloudinary(videoLocalPath),
-        uploadOnCloudinary(thumbnailLocalPath)
-    ]);
-    if(!videoFile || !thumbnail){
-    if(videoFile){
-        await deleteFromCloudinary(videoFile.public_id, "video");
-        
-     }
-   
-     if(thumbnail){
-        await deleteFromCloudinary(thumbnail.public_id, "image");
-        
-     }
-     throw new ApiError(500, "Failed to upload all media assets. Please try again.");
-    }
-    const video= await Video.create({
-        videoFile:videoFile.secure_url,
-        thumbnail:thumbnail.secure_url,
-        owner:req.user._id,
-        title:title.trim(),
-        description:description?.trim()||"",
-        isPublished:true
-    })
-
-    const videoAdded= await Video.findById(video._id)
-    if(!videoAdded){
-        throw new ApiError(500,"video not added in mongodb")
-    }
-
-    return res.status(201)
-    .json(new ApiResponse(201,videoAdded,"video added successfully"))
-
+    await VideoQueue.add('publish-video',{
+        user_id,
+        title,
+        description,
+        videoLocalPath,
+        thumbnailLocalPath
+    });
+ 
+    return res.status(202).json(
+        new ApiResponse(202, {}, "Video upload queued, processing in background")
+    );
 })
 
 const getVideoById=asynchandler(async(req,res)=>{

@@ -1,8 +1,9 @@
 import 'dotenv/config'
 import connectDb from './db/index.js';
+import {connectredis} from './db/redis.js'
 import {app} from './app.js';
 const PORT=process.env.PORT || 3000;
- connectDb()
+Promise.all([connectDb(),connectredis()])
 .then(() => {
    
     app.listen(PORT, () => {

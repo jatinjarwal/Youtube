@@ -6,6 +6,10 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { deleteFromCloudinary } from "../utils/deleteUploads.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import {redis} from '../db/redis.js'
+import { Subscription } from "../models/subscription.model.js";
+import ClearRedis from "../utils/ClearRedis.js";
+
 
 
 
@@ -190,7 +194,7 @@ const updateUserPassword = asynchandler(async (req, res) => {
 });
 
 const getCurrentUser = asynchandler(async (req,res)=>{
-    const user = await User.findById(req.user._id).select("-pasword -refreshToken");
+    const user = await User.findById(req.user._id).select("-password -refreshToken");
     if(!user){
         throw new ApiError(404, "User not found");
     }
@@ -212,6 +216,7 @@ const updateUserDetails  = asynchandler(async (req,res)=>{
     if(!updatedUser){
         throw new ApiError(404, "User not found");
     }
+    await ClearRedis(username);
     return res.status(200)
     .json(new ApiResponse(200, updatedUser, "User details updated successfully"));
 });
@@ -225,7 +230,7 @@ const updateUserAvatar= asynchandler(async (req,res)=>{
         throw new ApiError(400, "Avatar image is required");
     }
 
-    const avatar = await upLoadOnCloudinary(avatarLocalPath);
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
     if(!avatar||!avatar.url){
         throw new ApiError(500,"failed to upload avatar on cloudinary");    
     }
@@ -247,8 +252,9 @@ const updateUserAvatar= asynchandler(async (req,res)=>{
   
     
         await deleteFromCloudinary(publicId);
+        
    
-
+    await ClearRedis(req.user.username)
 
    
     return res.
@@ -261,8 +267,8 @@ const updateUserCoverImage= asynchandler(async (req,res)=>{
     if(!coverImageLocalPath){
         throw new ApiError(400, "Cover image is required");
     }
-    const coverImage = await upLoadOnCloudinary(coverImageLocalPath);
-    if(coverImage||!coverImage.url){
+    const coverImage = await uploadOnCloudinary(coverImageLocalPath);
+    if(!coverImage||!coverImage.url){
         throw new ApiError(500,"failed to upload cover image on cloudinary");    
     }
     const updatedUsercoverImage= await User.findByIdAndUpdate(req.user._id,{
@@ -274,6 +280,7 @@ const updateUserCoverImage= asynchandler(async (req,res)=>{
     if(!updatedUsercoverImage){
         throw new ApiError(404, "User not found");
     }
+    await ClearRedis(req.user.username)
     return res.
     status(200).
     json(new ApiResponse(200, updatedUsercoverImage, "User cover image updated successfully"));
@@ -281,10 +288,19 @@ const updateUserCoverImage= asynchandler(async (req,res)=>{
 
 const getUserChannelProfile = asynchandler(async (req,res)=>{
     const {username}= req.params;
-    const _id=new mongoose.Types.ObjectId(req.user._id);
+    const user_id = req.user._id;
     if(!username){
         throw new ApiError(400 , "no channel found");
     }
+
+    const cacheKey = `channel_profile:${username.toLowerCase()}`;
+    const cachedProfile = await redis.get(cacheKey);
+    let profileData;
+    if (cachedProfile) {
+        profileData= JSON.parse(cachedProfile)
+    }
+    else{
+ 
     const channel = await User.aggregate([
         {
           $match:{
@@ -315,22 +331,16 @@ const getUserChannelProfile = asynchandler(async (req,res)=>{
             },
             subscribedCount:{
                 $size:"$subscribed"
-            },
-            isSubscribed:{
-                $cond:{
-                    if:{$in:[_id,"$subscribers.subscriber"]},
-                    then:true,
-                    else:false
-                }
             }
+           
         }
     },{
         $project:{
+            _id:1,
             fullName:1,
             username:1,
             subsCount:1,
             subscribedCount:1,
-            isSubscribed:1,
             avatar:1,
             coverImage:1
             
@@ -340,10 +350,23 @@ const getUserChannelProfile = asynchandler(async (req,res)=>{
     if(!channel || channel.length===0){
         throw new ApiError(404, "Channel not found");
     }
-    return res.status(200)
-    .json(new ApiResponse(200,channel[0],"Channel profile fetched successfully"));
+    profileData=channel[0];
 
-    
+    await redis.set(cacheKey, JSON.stringify(profileData));
+    }
+    const subscription = await Subscription.findOne({
+        subscriber: user_id,
+        channel: profileData._id
+    });
+
+
+    profileData.isSubscribed = subscription ? true : false;
+
+    return res.status(200).json(
+        new ApiResponse(200, profileData, "Channel profile fetched successfully")
+    );
+   
+   
 
 
 

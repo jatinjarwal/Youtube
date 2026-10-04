@@ -64,12 +64,13 @@ const addComment= asyncHandler(async(req,res)=>{
     const {content}= req.body
     const owner= req.user._id;
     const {video_id }= req.params
+    
     const comment = await Comment.create({
         content:content,
         video:video_id,
         owner:owner
     })
-     if(!comment?.trim()){
+     if(!comment){
     throw new ApiError(500,"error while adding comment")
    }
 
