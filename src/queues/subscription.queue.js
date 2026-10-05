@@ -1,5 +1,6 @@
 import { Queue, Worker } from 'bullmq';
 import { Subscription } from '../models/subscription.model.js';
+import{User} from "../models/user.model.js"
 import {redis} from '../db/redis.js';
 
 

@@ -24,7 +24,7 @@ const channelStats = asynchandler(async(req,res)=>{
 const channelVideos= asynchandler(async(req,res)=>{
     const user_id=req.user._id
 
-    const videos=await Video.find({onwer:user_id})
+    const videos=await Video.find({owner:user_id})
    
 
     return res.status(200)

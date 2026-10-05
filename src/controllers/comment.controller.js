@@ -8,7 +8,7 @@ import mongoose from "mongoose"
 
 
 const viewComment =asyncHandler(async(req,res)=>{
-     const {_id}= req.params;
+     const {video_id:_id}= req.params;
 
 
     const  aggregateComments=  Comment.aggregate([
@@ -81,6 +81,12 @@ const addComment= asyncHandler(async(req,res)=>{
 const updateComment=asyncHandler(async(req,res)=>{
     const {content}=req.body
     const {comment_id}=req.params
+    const comment=await Comment.findById(comment_id)
+    const userid =req.user._id.toString()
+    const owner=comment.owner.toString()
+    if(userid!==owner){
+        throw new ApiError(403,"not allowed")
+    }
     const updatedComment= await Comment.findByIdAndUpdate(comment_id,{
         $set:{
             content:content

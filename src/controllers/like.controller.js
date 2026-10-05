@@ -1,4 +1,4 @@
-import aysnchandler from "../utils/asynchandler.js"
+import asynchandler from "../utils/asynchandler.js"
 import {Like} from "../models/like.model.js"
 import{Video} from "../models/video.model.js"
 import{Comment} from "../models/comment.model.js"
@@ -6,11 +6,11 @@ import{Tweet} from "../models/tweet.model.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import mongoose from "mongoose"
-import asyncHandler from "../utils/asynchandler.js"
 
 
 
-const videoLike= aysnchandler(async(req,res)=>{
+
+const videoLike= asynchandler(async(req,res)=>{
     const {video_id}=req.params
     const user_id= req.user._id
     const video=await Video.findById(video_id)
@@ -43,7 +43,7 @@ const videoLike= aysnchandler(async(req,res)=>{
 
 })
 
-const commentLike= aysnchandler(async(req,res)=>{
+const commentLike= asynchandler(async(req,res)=>{
     const {comment_id}=req.params
     const user_id= req.user._id
     const comment=await Comment.findById(comment_id)
@@ -76,7 +76,7 @@ const commentLike= aysnchandler(async(req,res)=>{
 
 })
 
-const tweetLike= aysnchandler(async(req,res)=>{
+const tweetLike= asynchandler(async(req,res)=>{
     const {tweet_id}=req.params
     const user_id= req.user._id
     const tweet=await Tweet.findById(tweet_id)
@@ -109,7 +109,7 @@ const tweetLike= aysnchandler(async(req,res)=>{
 
 })
 
-const getLikedVideos= asyncHandler(async(req,res)=>{
+const getLikedVideos= asynchandler(async(req,res)=>{
         const user_id=req.user._id
 
         const likedvideos= await Like.aggregate([
