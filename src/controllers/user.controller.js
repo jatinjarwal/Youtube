@@ -206,6 +206,8 @@ const updateUserDetails  = asynchandler(async (req,res)=>{
     if(!fullName || !username){
         throw new ApiError(400, "Full name and username are required");
     }
+    
+    const oldUsername=req.user.username
     const updatedUser= await User.findByIdAndUpdate(req.user._id,{
       $set: {
         fullName,
@@ -216,7 +218,7 @@ const updateUserDetails  = asynchandler(async (req,res)=>{
     if(!updatedUser){
         throw new ApiError(404, "User not found");
     }
-    await ClearRedis(username);
+    await ClearRedis(oldUsername);
     return res.status(200)
     .json(new ApiResponse(200, updatedUser, "User details updated successfully"));
 });
