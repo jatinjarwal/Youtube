@@ -1,9 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { globalRateLimiter } from './middlewares/ratelimit.middleware.js';
+
 
 const app=express();
+app.set("trust proxy", 1);
 app.use(express.json({limit:'12kb'}));
 app.use(cors({
     origin:process.env.CORS_ORIGIN,
@@ -13,7 +14,7 @@ app.use(cors({
 app.use(cookieParser());
 app.use(express.static('public'));
 app.use(express.urlencoded({limit:'12kb', extended:true}));
-app.use(globalRateLimiter);
+
 
 import userRoutes from './routes/user.routes.js';
 import commentRoutes from './routes/comment.routes.js'

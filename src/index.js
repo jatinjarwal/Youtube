@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import connectDb from './db/index.js';
-import {redis} from './db/redis.js'
 import {app} from './app.js';
 const PORT=process.env.PORT || 3000;
 connectDb()

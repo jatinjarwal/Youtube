@@ -14,7 +14,7 @@ import {
 
 import upload from "../middlewares/multer.middleware.js";  
 import {verifyJWT} from "../middlewares/auth.middleware.js";
-import { authRateLimiter } from "../middlewares/ratelimit.middleware.js";
+import { authRateLimiter,uploadRateLimiter } from "../middlewares/ratelimit.middleware.js";
 
 const router = Router();
 
@@ -40,12 +40,12 @@ router.route('/update-profile')
     .patch(verifyJWT, updateUserDetails);
 
 router.route('/update-avatar')
-    .patch(verifyJWT,
+    .patch(verifyJWT,uploadRateLimiter,
         upload.single("avatar"),
         updateUserAvatar);
 
 router.route('/update-cover-image')
-    .patch(verifyJWT, 
+    .patch(verifyJWT,uploadRateLimiter,
         upload.single("coverImage"),
         updateUserCoverImage);
 
