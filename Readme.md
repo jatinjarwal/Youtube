@@ -1,161 +1,182 @@
-video stream platform api backend
+\documentclass[10pt,a4paper]{article}
 
-A scalable backend for a video streaming platform built using Node.js, Express.js, MongoDB, and Mongoose. The project provides APIs for video management, user authentication, subscriptions, playlists, comments, likes, and channel analytics.
+% =========================================================
+% PACKAGES
+% =========================================================
+\usepackage[
+    top=0.55in,
+    bottom=0.55in,
+    left=0.62in,
+    right=0.62in
+]{geometry}
 
----
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage[hidelinks]{hyperref}
+\usepackage{xcolor}
+\usepackage{tabularx}
 
-## 🚀 Features
+% =========================================================
+% GENERAL FORMATTING
+% =========================================================
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0pt}
 
-- JWT-based Authentication & Authorization
-- Access Token and Refresh Token Support
-- Video Upload and Management
-- Cloudinary Integration for Media Storage
-- User Profile Management
-- Comments and Likes System
-- Subscription Management
-- Playlist Creation and Management
-- Watch History Tracking
-- Channel Statistics and Analytics
-- Pagination, Search, and Filtering
-- Centralized Error Handling
-- RESTful API Architecture
+\urlstyle{same}
 
----
+% =========================================================
+% SECTION FORMATTING
+% =========================================================
+\titleformat{\section}
+    {\fontsize{11}{13}\selectfont\bfseries}
+    {}
+    {0pt}
+    {}
+    [\vspace{-3pt}\titlerule]
 
-## 🛠️ Tech Stack
+\titlespacing{\section}
+    {0pt}
+    {9pt}
+    {5pt}
 
-### Backend
-- Node.js
-- Express.js
+% =========================================================
+% BULLET FORMATTING
+% =========================================================
+\setlist[itemize]{
+    leftmargin=0.20in,
+    itemsep=2.5pt,
+    topsep=2pt,
+    parsep=0pt,
+    partopsep=0pt
+}
 
-### Database
-- MongoDB
-- Mongoose
+% =========================================================
+% CUSTOM COMMANDS
+% =========================================================
 
-### Authentication
-- JWT (JSON Web Tokens)
+\newcommand{\project}[2]{
+    \textbf{\fontsize{10.5}{12}\selectfont #1}
+    \hfill
+    \href{#2}{\textbf{GitHub}}
+}
 
-### File Handling
-- Multer
-- Cloudinary
+\newcommand{\education}[2]{
+    \textbf{#1}
+    \hfill
+    #2
+}
 
-### Development Tools
-- Postman
-- Git
-- GitHub
+% =========================================================
+% DOCUMENT
+% =========================================================
 
----
+\begin{document}
 
-## 📂 Project Structure
+% =========================================================
+% HEADER
+% =========================================================
 
-```text
-src/
-├── controllers/
-├── models/
-├── routes/
-├── middlewares/
-├── utils/
-├── db/
-├── constants/
-└── app.js
-```
+\begin{center}
+{\fontsize{21}{24}\selectfont\textbf{JATIN}}
+\vspace{4pt}
 
----
+{\fontsize{9.5}{11}\selectfont
+    Delhi, India    \quad|\quad    +91 9319331978    \quad|\quad    \href{mailto:jatinkumar1234jarwal@gmail.com}{jatinkumar1234jarwal@gmail.com}
+    }
+\vspace{3pt}
 
-## 📌 API Modules
+{\fontsize{9.5}{11}\selectfont
+    \href{https://github.com/jatinjarwal}{GitHub}    \quad|\quad    \href{https://www.linkedin.com/in/jatin-j-39a422359/}{LinkedIn}    \quad|\quad    \href{https://leetcode.com/u/Jatinjarwal/}{LeetCode}
+    }
+\end{center}
 
-### User
-- Register User
-- Login User
-- Logout User
-- Update Profile
-- Change Password
-- View Channel Profile
+% =========================================================
+% SUMMARY
+% =========================================================
 
-### Video
-- Upload Video
-- Update Video
-- Delete Video
-- Publish/Unpublish Video
-- Get Video Details
+\section{SUMMARY}
+Aspiring Backend Engineer with strong proficiency in building scalable RESTful APIs using Node.js, Express, and MongoDB. Experienced in optimizing backend performance through asynchronous message queues (BullMQ), caching strategies (Redis), and atomic database transactions. Adept at deploying containerized applications (Docker) on cloud infrastructure (AWS EC2, ECS) with robust security and proxy configurations (Nginx).
 
-### Comment
-- Add Comment
-- Update Comment
-- Delete Comment
-- View Comments
+% =========================================================
+% EDUCATION
+% =========================================================
 
-### Like
-- Like/Unlike Video
-- Like/Unlike Comment
-- Like/Unlike Tweet
+\section{EDUCATION}
+\education {Netaji Subhas University of Technology (NSUT), Delhi} {2022--2026}
+\vspace{1pt}
+B.Tech. --- Instrumentation \& Control Engineering
+\vspace{3pt}
 
-### Playlist
-- Create Playlist
-- Update Playlist
-- Delete Playlist
-- Add/Remove Videos
+\textbf{CBSE:} Class XII --- 83\% (2021) \hspace{15pt} Class X --- 87\% (2019)
 
-### Subscription
-- Subscribe to Channel
-- Unsubscribe from Channel
-- View Subscribers
+% =========================================================
+% TECHNICAL SKILLS
+% =========================================================
 
-### Dashboard
-- Channel Statistics
-- Watch History
-- Uploaded Videos Analytics
+\section{TECHNICAL SKILLS}
+\textbf{Languages:} JavaScript, C++, SQL
+\vspace{2pt}
 
+\textbf{Backend \& Frameworks:} Node.js, Express.js, RESTful APIs, Mongoose
+\vspace{2pt}
 
-## 🔒 Security Features
+\textbf{Databases \& Queues:} MongoDB, MySQL, Redis, BullMQ
+\vspace{2pt}
 
-- Password Hashing using bcrypt
-- JWT Authentication
-- Protected Routes
-- Refresh Token Support
-- Input Validation
-- Ownership Verification for Resources
+\textbf{Cloud \& DevOps:} AWS (EC2, ECS), Docker, Nginx, Git, GitHub, Postman
+\vspace{2pt}
 
----
+\textbf{Authentication \& Security:} JWT, bcrypt.js, Redis Rate Limiting
+\vspace{2pt}
 
-## 📈 Key Functionalities
+\textbf{Fundamentals:} Data Structures \& Algorithms, DBMS, OOP, Operating Systems, Computer Networks
 
-- Secure user authentication and authorization
-- Upload and manage videos using Cloudinary
-- Like, comment, and subscribe functionalities
-- Create and manage playlists
-- Track watch history
-- Generate channel analytics using MongoDB Aggregation Pipelines
-- Search, filter, and paginate content efficiently
+% =========================================================
+% PROJECTS
+% =========================================================
 
----
+\section{PROJECTS}
 
-## 🚀 Future Improvements
+% -------------------- PROJECT 1 --------------------
+\project {Video Streaming Platform --- Backend} {https://github.com/jatinjarwal/Youtube}
+\vspace{2pt}
 
-- Video Streaming Support
-- Recommendation System
-- Real-Time Notifications
-- Redis Caching
-- API Rate Limiting
-- Unit & Integration Testing
+{\fontsize{9}{10.5}\selectfont \textit{ Node.js | Express | MongoDB | Redis | BullMQ | Docker | AWS EC2 | Nginx }}
+\vspace{3pt}
+\begin{itemize}
+\item Engineered a scalable video streaming API deployed on an \textbf{AWS EC2} instance via \textbf{Docker} containers, utilizing an \textbf{Nginx} reverse proxy to handle secure web traffic and large multi-part file uploads.
+\item Designed an asynchronous event-driven architecture using \textbf{BullMQ and Redis} to offload heavy \textbf{Cloudinary} media uploads and user subscription logic to isolated background worker processes.
+\item Enforced strict database integrity across complex relational models (Likes, Comments, Playlists) by implementing \textbf{ACID-compliant Mongoose transactions} for cascading resource deletions.
+\item Optimized database performance utilizing \textbf{MongoDB Aggregation Pipelines} for advanced watch history analytics, while actively caching frequently read channel profiles in \textbf{Redis}.
+\item Secured the platform with \textbf{JWT authentication}, HTTP-only cookies, and \textbf{IP-based API Rate Limiting} powered by Upstash Redis to mitigate brute-force attacks.
+\end{itemize}
+\vspace{3pt}
 
----
+% -------------------- PROJECT 2 --------------------
+\project {WePay --- Group Expense Tracker} {https://github.com/jatinjarwal/Wepay-backend}
+\vspace{2pt}
 
-## 🎯 Learning Outcomes
+{\fontsize{9}{10.5}\selectfont \textit{ Node.js | Express.js | MongoDB | Mongoose | JWT | bcrypt.js }}
+\vspace{3pt}
+\begin{itemize}
+\item Developed a backend API using \textbf{Node.js, Express.js, and MongoDB} for managing shared group expenses.
+\item Implemented \textbf{JWT authentication} with secure user registration and login using bcrypt.js for password hashing.
+\item Built APIs for \textbf{group creation, expense management, category tracking, and automatic expense splitting} between group members.
+\item Implemented logic to \textbf{detect duplicate expenses} and calculate how much each member owes or is owed.
+\end{itemize}
 
-- Backend Development with Node.js and Express.js
-- REST API Design
-- Authentication & Authorization
-- MongoDB Aggregation Pipelines
-- File Upload Management
-- Middleware Design
-- Database Modeling
-- Error Handling & Validation
+% =========================================================
+% ACHIEVEMENTS & CERTIFICATIONS
+% =========================================================
 
----
+\section{ACHIEVEMENTS \& CERTIFICATIONS}
+\begin{itemize}
+\item HackerRank Advanced SQL Certificate demonstrating proficiency in SQL.
+\item NPTEL Internet of Things — \textbf{Top 5\%}.
+\item Solved \textbf{300+ DSA and SQL problems} across LeetCode, GeeksforGeeks, and CodeChef.
+\end{itemize}
 
-## 👨‍💻 Author
-
-Jatin
-
-Built as a backend-focused project to learn scalable API development using the MERN ecosystem.
+\end{document}
