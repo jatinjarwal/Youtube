@@ -1,182 +1,102 @@
-\documentclass[10pt,a4paper]{article}
+# 📺 Video Streaming Platform API Backend
 
-% =========================================================
-% PACKAGES
-% =========================================================
-\usepackage[
-    top=0.55in,
-    bottom=0.55in,
-    left=0.62in,
-    right=0.62in
-]{geometry}
+A scalable, production-grade RESTful API backend for a video streaming platform built using Node.js, Express.js, MongoDB, and Mongoose. This application features asynchronous background processing, ACID-compliant database operations, and a robust cloud deployment architecture.
 
-\usepackage[T1]{fontenc}
-\usepackage{lmodern}
-\usepackage{titlesec}
-\usepackage{enumitem}
-\usepackage[hidelinks]{hyperref}
-\usepackage{xcolor}
-\usepackage{tabularx}
+🟢 **Live API Base URL:** `http://13.206.167.188/api/v1`
 
-% =========================================================
-% GENERAL FORMATTING
-% =========================================================
-\pagestyle{empty}
-\setlength{\parindent}{0pt}
-\setlength{\parskip}{0pt}
+---
 
-\urlstyle{same}
+## 🚀 Key Features & Architecture
 
-% =========================================================
-% SECTION FORMATTING
-% =========================================================
-\titleformat{\section}
-    {\fontsize{11}{13}\selectfont\bfseries}
-    {}
-    {0pt}
-    {}
-    [\vspace{-3pt}\titlerule]
+*   **Asynchronous Media Pipeline:** Engineered a distributed background job pipeline using BullMQ and Redis to asynchronously process Cloudinary media uploads and channel subscriptions, ensuring zero main-thread blocking.
+*   **In-Memory Caching:** Implemented Redis caching for high-traffic read operations (e.g., channel profiles), bypassing complex MongoDB aggregation pipelines to significantly improve API response times.
+*   **Data Integrity & Transactions:** Utilizes MongoDB ACID transactions to guarantee data integrity during complex cascade deletion operations spanning videos, comments, likes, and cloud assets.
+*   **Production Infrastructure:** Deployed the REST API to an AWS EC2 instance attached to an Elastic IP, utilizing PM2 in cluster mode to independently manage scalable API instances and isolated worker processes. Traffic is securely routed through an Nginx global reverse proxy.
+*   **Advanced Security:** Secured API endpoints against DDoS and abuse by implementing sliding-window rate limiters via Upstash Redis. Features JWT-based Access and Refresh Token authentication with bcrypt password hashing.
+*   **Deep Analytics:** Employs complex MongoDB Aggregation Pipelines to generate detailed channel statistics and user watch histories.
 
-\titlespacing{\section}
-    {0pt}
-    {9pt}
-    {5pt}
+---
 
-% =========================================================
-% BULLET FORMATTING
-% =========================================================
-\setlist[itemize]{
-    leftmargin=0.20in,
-    itemsep=2.5pt,
-    topsep=2pt,
-    parsep=0pt,
-    partopsep=0pt
-}
+## 🛠️ Tech Stack
 
-% =========================================================
-% CUSTOM COMMANDS
-% =========================================================
+### Core Application
+*   **Runtime & Framework:** Node.js, Express.js
+*   **Database & ODM:** MongoDB, Mongoose
+*   **Authentication:** JSON Web Tokens (JWT), bcrypt.js
 
-\newcommand{\project}[2]{
-    \textbf{\fontsize{10.5}{12}\selectfont #1}
-    \hfill
-    \href{#2}{\textbf{GitHub}}
-}
+### Infrastructure & Cloud
+*   **Hosting & Proxy:** AWS EC2, Nginx
+*   **Process Management:** PM2 (Cluster Mode & Worker Separation)
+*   **Caching & Queues:** Redis (Upstash), BullMQ
+*   **Cloud Storage & Media:** Cloudinary, Multer
 
-\newcommand{\education}[2]{
-    \textbf{#1}
-    \hfill
-    #2
-}
+---
 
-% =========================================================
-% DOCUMENT
-% =========================================================
+## 🧪 Recruiter & Developer Testing Guide
 
-\begin{document}
+Testing a headless backend without a frontend can be difficult. Think of this API like a restaurant kitchen: you send an order (a Request) using an API client, and it serves you data (a Response). 
 
-% =========================================================
-% HEADER
-% =========================================================
+To explore this live project easily, use **Postman**, **Thunder Client** (a VS Code extension), or **cURL**. Here is a step-by-step humanized guide to testing the core flow:
 
-\begin{center}
-{\fontsize{21}{24}\selectfont\textbf{JATIN}}
-\vspace{4pt}
+### 1. Server Pulse Check (Health Route)
+Verify that the Nginx proxy is properly routing traffic to the Node application.
+*   **Method:** `GET`
+*   **URL:** `http://13.206.167.188/api/v1/health`
+*   **Expected Response:** A `200 OK` status confirming the server is actively listening. *(You can actually just click this link directly in your web browser!)*
 
-{\fontsize{9.5}{11}\selectfont
-    Delhi, India    \quad|\quad    +91 9319331978    \quad|\quad    \href{mailto:jatinkumar1234jarwal@gmail.com}{jatinkumar1234jarwal@gmail.com}
+### 2. Account Registration
+Create a test user account to interact with the platform.
+*   **Method:** `POST`
+*   **URL:** `http://13.206.167.188/api/v1/users/register`
+*   **Body Type:** `form-data` *(Required because we are handling physical file uploads via Multer)*
+*   **Keys to Add:**
+    *   `fullName`: "Test User"
+    *   `username`: "testuser123"
+    *   `email`: "test@example.com"
+    *   `password`: "SecurePassword123"
+    *   `avatar`: *(Attach a sample image file from your computer)*
+*   **Expected Response:** A `201 Created` status with the new user profile object.
+
+### 3. Authentication (Login)
+Retrieve your secure JWT access and refresh tokens.
+*   **Method:** `POST`
+*   **URL:** `http://13.206.167.188/api/v1/users/login`
+*   **Body Type:** `raw` (JSON)
+    ```json
+    {
+      "email": "test@example.com",
+      "password": "SecurePassword123"
     }
-\vspace{3pt}
+    ```
+*   **Expected Response:** A `200 OK` status. Your API client will automatically store the secure HTTP-only authentication cookies required for the next step.
 
-{\fontsize{9.5}{11}\selectfont
-    \href{https://github.com/jatinjarwal}{GitHub}    \quad|\quad    \href{https://www.linkedin.com/in/jatin-j-39a422359/}{LinkedIn}    \quad|\quad    \href{https://leetcode.com/u/Jatinjarwal/}{LeetCode}
-    }
-\end{center}
+### 4. Asynchronous Video Upload (The Heavy Lifter)
+Test the background BullMQ worker pipeline. Because of the queue architecture, the server will not make you wait for the file to reach Cloudinary.
+*   **Method:** `POST`
+*   **URL:** `http://13.206.167.188/api/v1/videos`
+*   **Headers:** Ensure your Authorization cookie/token is attached.
+*   **Body Type:** `form-data`
+*   **Keys to Add:**
+    *   `title`: "BullMQ Test Video"
+    *   `description`: "Testing the background worker queue."
+    *   `videoFile`: *(Attach a short .mp4 file)*
+    *   `thumbnail`: *(Attach a sample image file)*
+*   **Expected Response:** You will instantly receive a `202 Accepted` status indicating the files have been buffered locally and the upload job has been queued. The isolated background worker processes the heavy asset transfer to Cloudinary behind the scenes, ensuring the API remains highly responsive.
 
-% =========================================================
-% SUMMARY
-% =========================================================
+---
 
-\section{SUMMARY}
-Aspiring Backend Engineer with strong proficiency in building scalable RESTful APIs using Node.js, Express, and MongoDB. Experienced in optimizing backend performance through asynchronous message queues (BullMQ), caching strategies (Redis), and atomic database transactions. Adept at deploying containerized applications (Docker) on cloud infrastructure (AWS EC2, ECS) with robust security and proxy configurations (Nginx).
+## 📂 Project Structure
 
-% =========================================================
-% EDUCATION
-% =========================================================
-
-\section{EDUCATION}
-\education {Netaji Subhas University of Technology (NSUT), Delhi} {2022--2026}
-\vspace{1pt}
-B.Tech. --- Instrumentation \& Control Engineering
-\vspace{3pt}
-
-\textbf{CBSE:} Class XII --- 83\% (2021) \hspace{15pt} Class X --- 87\% (2019)
-
-% =========================================================
-% TECHNICAL SKILLS
-% =========================================================
-
-\section{TECHNICAL SKILLS}
-\textbf{Languages:} JavaScript, C++, SQL
-\vspace{2pt}
-
-\textbf{Backend \& Frameworks:} Node.js, Express.js, RESTful APIs, Mongoose
-\vspace{2pt}
-
-\textbf{Databases \& Queues:} MongoDB, MySQL, Redis, BullMQ
-\vspace{2pt}
-
-\textbf{Cloud \& DevOps:} AWS (EC2, ECS), Docker, Nginx, Git, GitHub, Postman
-\vspace{2pt}
-
-\textbf{Authentication \& Security:} JWT, bcrypt.js, Redis Rate Limiting
-\vspace{2pt}
-
-\textbf{Fundamentals:} Data Structures \& Algorithms, DBMS, OOP, Operating Systems, Computer Networks
-
-% =========================================================
-% PROJECTS
-% =========================================================
-
-\section{PROJECTS}
-
-% -------------------- PROJECT 1 --------------------
-\project {Video Streaming Platform --- Backend} {https://github.com/jatinjarwal/Youtube}
-\vspace{2pt}
-
-{\fontsize{9}{10.5}\selectfont \textit{ Node.js | Express | MongoDB | Redis | BullMQ | Docker | AWS EC2 | Nginx }}
-\vspace{3pt}
-\begin{itemize}
-\item Engineered a scalable video streaming API deployed on an \textbf{AWS EC2} instance via \textbf{Docker} containers, utilizing an \textbf{Nginx} reverse proxy to handle secure web traffic and large multi-part file uploads.
-\item Designed an asynchronous event-driven architecture using \textbf{BullMQ and Redis} to offload heavy \textbf{Cloudinary} media uploads and user subscription logic to isolated background worker processes.
-\item Enforced strict database integrity across complex relational models (Likes, Comments, Playlists) by implementing \textbf{ACID-compliant Mongoose transactions} for cascading resource deletions.
-\item Optimized database performance utilizing \textbf{MongoDB Aggregation Pipelines} for advanced watch history analytics, while actively caching frequently read channel profiles in \textbf{Redis}.
-\item Secured the platform with \textbf{JWT authentication}, HTTP-only cookies, and \textbf{IP-based API Rate Limiting} powered by Upstash Redis to mitigate brute-force attacks.
-\end{itemize}
-\vspace{3pt}
-
-% -------------------- PROJECT 2 --------------------
-\project {WePay --- Group Expense Tracker} {https://github.com/jatinjarwal/Wepay-backend}
-\vspace{2pt}
-
-{\fontsize{9}{10.5}\selectfont \textit{ Node.js | Express.js | MongoDB | Mongoose | JWT | bcrypt.js }}
-\vspace{3pt}
-\begin{itemize}
-\item Developed a backend API using \textbf{Node.js, Express.js, and MongoDB} for managing shared group expenses.
-\item Implemented \textbf{JWT authentication} with secure user registration and login using bcrypt.js for password hashing.
-\item Built APIs for \textbf{group creation, expense management, category tracking, and automatic expense splitting} between group members.
-\item Implemented logic to \textbf{detect duplicate expenses} and calculate how much each member owes or is owed.
-\end{itemize}
-
-% =========================================================
-% ACHIEVEMENTS & CERTIFICATIONS
-% =========================================================
-
-\section{ACHIEVEMENTS \& CERTIFICATIONS}
-\begin{itemize}
-\item HackerRank Advanced SQL Certificate demonstrating proficiency in SQL.
-\item NPTEL Internet of Things — \textbf{Top 5\%}.
-\item Solved \textbf{300+ DSA and SQL problems} across LeetCode, GeeksforGeeks, and CodeChef.
-\end{itemize}
-
-\end{document}
+```text
+src/
+├── controllers/    # Route controllers & business logic (videos, users, etc.)
+├── db/             # MongoDB and Redis connection setups
+├── middlewares/    # JWT verification, Multer, Rate Limiting, Error handling
+├── models/         # Mongoose Schemas (User, Video, Comment, Like, etc.)
+├── queues/         # BullMQ queue initializations for background jobs
+├── routes/         # Express API routing definitions
+├── utils/          # Cloudinary services, API Errors, and API Responses
+├── workers/        # Isolated worker processes for consuming queues
+├── constants.js    # Global application variables
+├── app.js          # Express app configuration & middleware binding
+└── index.js        # Main server entry point
